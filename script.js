@@ -239,7 +239,8 @@ class Game {
     if (this.wormAteApple()) {
       this.worm.body.push({ x: this.apple.x, y: this.apple.y });
       this.apple.createNew(this.worm);
-      this.score += 1;
+      this.score++;
+      $("#score").text(this.score);
     }
 
     this.worm.move();
@@ -252,12 +253,25 @@ class Game {
   end() {
     this.isRunning = false;
     clearInterval(this.interval);
-    $("#score").text(this.score);
-    $("#game-over-message").css({ display: "flex" });
+    $("#game-over-message").css({
+      zIndex: 0,
+    });
+    $("#game-over-message").animate(
+      {
+        top: "50%",
+        opacity: 1,
+      },
+      500
+    );
   }
 
   reset() {
-    $("#game-over-message").css({ display: "none" });
+    $("#game-over-message").css({
+      zIndex: 0,
+      top: "70%",
+      opacity: 0,
+    });
+    $("#score").text(0);
     this.isRunning = true;
     this.score = 0;
     this.worm = new Worm();

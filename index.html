@@ -7,16 +7,23 @@
     <link rel="stylesheet" href="style.css">
     <title>Document</title>
 </head>
-<body>
-    <h1>Snake Game</h1>
-    <div class="game-box">
-        <div id="game-over-message" class="game-over">
-            <h2>Você Perdeu</h2>
-            <p>Pontuação: <span id="score">0</span></p>
-            <button id="reset-btn">Jogar de novo</button>
+<body> 
+    <nav class="header">
+        <h1>Snake Game</h1>
+    </nav>
+    <main>
+        <div class="score-box">
+            <h2>Pontuação</h2>
+            <p id="score">0</p>
         </div>
-        <canvas id="board"></canvas>
-    </div>
+        <div class="game-box">
+            <div id="game-over-message" class="game-over">
+                <h2>Você Perdeu!</h2>
+                <button id="reset-btn">Jogar de novo</button>
+            </div>
+            <canvas id="board"></canvas>
+        </div>
+    </main>
     <script src="script.js"></script>
 </body>
 </html>
