@@ -9,8 +9,8 @@ class Board {
   }
 
   paintHoleBoard() {
-    for (var i = 0; i < this.numberOfBlocks; i++) {
-      for (var j = 0; j < this.numberOfBlocks; j++) {
+    for (let i = 0; i < this.numberOfBlocks; i++) {
+      for (let j = 0; j < this.numberOfBlocks; j++) {
         this.canvasContext.fillStyle = (i + j) % 2 ? "#222222" : "#444444";
         this.realX = i * this.blockSize;
         this.realY = j * this.blockSize;
@@ -37,6 +37,21 @@ class Board {
       this.blockSize
     );
   }
+
+  paintWorm(worm) {
+    this.canvasContext.fillStyle = "#ffffff";
+    worm.body.forEach(({ x, y }) => {
+      this.realX = x * this.blockSize;
+      this.realY = y * this.blockSize;
+
+      this.canvasContext.fillRect(
+        this.realX,
+        this.realY,
+        this.blockSize,
+        this.blockSize
+      );
+    });
+  }
 }
 
 class Apple {
@@ -45,8 +60,121 @@ class Apple {
     this.y = this.randomIntFrom0To(20);
   }
 
+  createNew(worm) {
+    let isInsideWorm = true;
+
+    while (isInsideWorm) {
+      let newX = this.randomIntFrom0To(20);
+      let newY = this.randomIntFrom0To(20);
+      let partsOfTheBody = worm.body.filter((part) => {
+        return (part.x === newX) & (part.y === newY);
+      });
+
+      if (partsOfTheBody.length === 0) {
+        isInsideWorm = false;
+        this.x = newX;
+        this.y = newY;
+      }
+    }
+  }
+
   randomIntFrom0To(max) {
     return Math.floor(Math.random() * max);
+  }
+}
+
+class Worm {
+  constructor() {
+    this.velocityX = 1;
+    this.velocityY = 0;
+    this.body = [
+      {
+        x: 0,
+        y: 0,
+      },
+    ];
+    this.direction = {
+      velocityX: 1,
+      velocityY: 0,
+    };
+  }
+
+  move() {
+    this.velocityX = this.direction.velocityX;
+    this.velocityY = this.direction.velocityY;
+
+    for (let i = this.body.length - 1; i > 0; i--) {
+      this.body[i] = { ...this.body[i - 1] };
+    }
+
+    this.body[0].x += this.velocityX;
+    this.body[0].y += this.velocityY;
+  }
+
+  changeDirection(e) {
+    const left = {
+      velocityX: -1,
+      velocityY: 0,
+    };
+    const up = {
+      velocityX: 0,
+      velocityY: -1,
+    };
+    const right = {
+      velocityX: 1,
+      velocityY: 0,
+    };
+    const down = {
+      velocityX: 0,
+      velocityY: 1,
+    };
+    switch (e.keyCOde || e.which) {
+      case 37: // Left
+        const isRight =
+          this.velocityX === right.velocityX &&
+          this.velocityY === right.velocityY;
+
+        if (!isRight) {
+          this.direction.velocityX = left.velocityX;
+          this.direction.velocityY = left.velocityY;
+        }
+        break;
+
+      case 38: // Up
+        const isDown =
+          this.velocityX === down.velocityX &&
+          this.velocityY === down.velocityY;
+
+        if (!isDown) {
+          this.direction.velocityX = up.velocityX;
+          this.direction.velocityY = up.velocityY;
+        }
+        break;
+
+      case 39: // Right
+        const isLeft =
+          this.velocityX === left.velocityX &&
+          this.velocityY === left.velocityY;
+
+        if (!isLeft) {
+          this.direction.velocityX = right.velocityX;
+          this.direction.velocityY = right.velocityY;
+        }
+        break;
+
+      case 40: // Down
+        const isUp =
+          this.velocityX === up.velocityX && this.velocityY === up.velocityY;
+
+        if (!isUp) {
+          this.direction.velocityX = down.velocityX;
+          this.direction.velocityY = down.velocityY;
+        }
+        break;
+
+      default:
+        break;
+    }
   }
 }
 
@@ -56,23 +184,93 @@ class Game {
     this.score = 0;
     this.apple = new Apple();
     this.board = new Board(500, 20);
+    this.worm = new Worm();
     this.board.paintHoleBoard();
     this.board.paintApple(this.apple);
+    $(document).on("keydown", (e) => {
+      this.worm.changeDirection(e);
+    });
     this.interval = setInterval(() => {
-      this.gameLoop();
+      this.loop();
     }, 250);
   }
 
-  gameLoop() {
+  wormAteApple() {
+    return (
+      this.worm.body[0].x === this.apple.x &&
+      this.worm.body[0].y === this.apple.y
+    );
+  }
+
+  wormIsOutOfBounds() {
+    return (
+      this.worm.body[0].x > this.board.numberOfBlocks - 1 ||
+      this.worm.body[0].y > this.board.numberOfBlocks - 1 ||
+      this.worm.body[0].x < 0 ||
+      this.worm.body[0].y < 0
+    );
+  }
+
+  wormHitItself() {
+    for (let i = 1; i < this.worm.body.length; i++) {
+      if (
+        this.worm.body[i].x ===
+          this.worm.body[0].x + this.worm.direction.velocityX &&
+        this.worm.body[i].y ===
+          this.worm.body[0].y + this.worm.direction.velocityY
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  loop() {
     if (!this.isRunning) {
       return;
     }
 
+    if (this.wormIsOutOfBounds() || this.wormHitItself()) {
+      this.end();
+      return;
+    }
+
+    if (this.wormAteApple()) {
+      this.worm.body.push({ x: this.apple.x, y: this.apple.y });
+      this.apple.createNew(this.worm);
+      this.score += 1;
+    }
+
+    this.worm.move();
+
     this.board.paintHoleBoard();
     this.board.paintApple(this.apple);
+    this.board.paintWorm(this.worm);
+  }
+
+  end() {
+    this.isRunning = false;
+    clearInterval(this.interval);
+    $("#score").text(this.score);
+    $("#game-over-message").css({ display: "flex" });
+  }
+
+  reset() {
+    $("#game-over-message").css({ display: "none" });
+    this.isRunning = true;
+    this.score = 0;
+    this.worm = new Worm();
+    this.apple = new Apple();
+    this.interval = setInterval(() => {
+      this.loop();
+    }, 250);
   }
 }
 
 $(document).ready(() => {
+  $("#reset-btn").on("click", () => {
+    game.reset();
+  });
   game = new Game();
 });
