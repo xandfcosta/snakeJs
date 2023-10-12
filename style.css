@@ -20,4 +20,33 @@ h1 {
     padding: 20px;
 }
 
+.game-box{
+    position: relative;
+}
+
+.game-over{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    background-color: #770000;
+}
+
+.game-over > button{
+    padding: 16px;
+    border-radius: 24px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.game-over > button:hover{
+    background-color: #969696;
+}
+
 

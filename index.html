@@ -9,7 +9,14 @@
 </head>
 <body>
     <h1>Snake Game</h1>
-    <canvas id="board"></canvas>
+    <div class="game-box">
+        <div id="game-over-message" class="game-over">
+            <h2>Você Perdeu</h2>
+            <p>Pontuação: <span id="score">0</span></p>
+            <button id="reset-btn">Jogar de novo</button>
+        </div>
+        <canvas id="board"></canvas>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
