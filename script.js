@@ -50,13 +50,29 @@ class Apple {
   }
 }
 
+class Game {
+  constructor() {
+    this.isRunning = true;
+    this.score = 0;
+    this.apple = new Apple();
+    this.board = new Board(500, 20);
+    this.board.paintHoleBoard();
+    this.board.paintApple(this.apple);
+    this.interval = setInterval(() => {
+      this.gameLoop();
+    }, 250);
+  }
+
+  gameLoop() {
+    if (!this.isRunning) {
+      return;
+    }
+
+    this.board.paintHoleBoard();
+    this.board.paintApple(this.apple);
+  }
+}
+
 $(document).ready(() => {
-  board = new Board(500, 20);
-
-  setInterval(() => {
-    apple = new Apple();
-
-    board.paintHoleBoard();
-    board.paintApple(apple);
-  }, 1000);
+  game = new Game();
 });
