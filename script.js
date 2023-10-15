@@ -182,6 +182,8 @@ class Game {
   constructor() {
     this.isRunning = true;
     this.score = 0;
+    this.speed = 250;
+    this.speedModifier = 0;
     this.apple = new Apple();
     this.board = new Board(500, 20);
     this.worm = new Worm();
@@ -190,9 +192,7 @@ class Game {
     $(document).on("keydown", (e) => {
       this.worm.changeDirection(e);
     });
-    this.interval = setInterval(() => {
-      this.loop();
-    }, 250);
+    this.loop();
   }
 
   wormAteApple() {
@@ -203,11 +203,13 @@ class Game {
   }
 
   wormIsOutOfBounds() {
+    const nextX = this.worm.body[0].x + this.worm.velocityX;
+    const nextY = this.worm.body[0].y + this.worm.velocityY;
     return (
-      this.worm.body[0].x > this.board.numberOfBlocks - 1 ||
-      this.worm.body[0].y > this.board.numberOfBlocks - 1 ||
-      this.worm.body[0].x < 0 ||
-      this.worm.body[0].y < 0
+      nextX > this.board.numberOfBlocks - 1 ||
+      nextY > this.board.numberOfBlocks - 1 ||
+      nextX < 0 ||
+      nextY < 0
     );
   }
 
@@ -224,6 +226,23 @@ class Game {
     }
 
     return false;
+  }
+
+  getGameSpeed() {
+    if (!this.score) {
+      return this.speed;
+    }
+    if (this.speed < 60) {
+      return this.speed;
+    }
+    const isScoreDivisiblePer5 = this.score % 5 === 0;
+    const needSpeedIncrease = this.score / 5 > this.speedModifier;
+    if (isScoreDivisiblePer5 && needSpeedIncrease) {
+      this.speed -= this.speed * 0.05;
+      this.speedModifier++;
+    }
+
+    return this.speed;
   }
 
   loop() {
@@ -248,11 +267,17 @@ class Game {
     this.board.paintHoleBoard();
     this.board.paintApple(this.apple);
     this.board.paintWorm(this.worm);
+
+    let newSpeed = this.getGameSpeed();
+
+    setTimeout(() => {
+      this.loop();
+    }, newSpeed);
   }
 
   end() {
     this.isRunning = false;
-    clearInterval(this.interval);
+    // clearInterval(this.interval);
     $("#game-over-message").css({
       zIndex: 0,
     });
@@ -276,9 +301,7 @@ class Game {
     this.score = 0;
     this.worm = new Worm();
     this.apple = new Apple();
-    this.interval = setInterval(() => {
-      this.loop();
-    }, 250);
+    this.loop();
   }
 }
 
