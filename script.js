@@ -202,7 +202,7 @@ class Game {
     );
   }
 
-  wormIsOutOfBounds() {
+  wormWillBeOutOfBounds() {
     const nextX = this.worm.body[0].x + this.worm.velocityX;
     const nextY = this.worm.body[0].y + this.worm.velocityY;
     return (
@@ -213,7 +213,7 @@ class Game {
     );
   }
 
-  wormHitItself() {
+  wormWhillHitItself() {
     for (let i = 1; i < this.worm.body.length; i++) {
       if (
         this.worm.body[i].x ===
@@ -250,10 +250,7 @@ class Game {
       return;
     }
 
-    if (this.wormIsOutOfBounds() || this.wormHitItself()) {
-      this.end();
-      return;
-    }
+    this.worm.move();
 
     if (this.wormAteApple()) {
       this.worm.body.push({ x: this.apple.x, y: this.apple.y });
@@ -262,7 +259,10 @@ class Game {
       $("#score").text(this.score);
     }
 
-    this.worm.move();
+    if (this.wormWillBeOutOfBounds() || this.wormWhillHitItself()) {
+      this.end();
+      return;
+    }
 
     this.board.paintHoleBoard();
     this.board.paintApple(this.apple);
