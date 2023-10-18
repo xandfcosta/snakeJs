@@ -39,18 +39,29 @@ class Board {
   }
 
   paintWorm(worm) {
-    this.canvasContext.fillStyle = "#ffffff";
-    worm.body.forEach(({ x, y }) => {
-      this.realX = x * this.blockSize;
-      this.realY = y * this.blockSize;
+    for(var i = 0; i < worm.body.length; i++){
+      if(i > 0 && i < worm.body.length - 1){
+        this.canvasContext.fillStyle = "#dddddd";
+      }
+      else if(i === 0){
+        this.canvasContext.fillStyle = "#ffffff"
+      } else {
+        this.canvasContext.fillStyle = "#aaaaaa"
+      }
+
+      var x = worm.body[i].x;
+      var y = worm.body[i].y;
+
+      var realX = x * this.blockSize;
+      var realY = y * this.blockSize;
 
       this.canvasContext.fillRect(
-        this.realX,
-        this.realY,
+        realX,
+        realY,
         this.blockSize,
         this.blockSize
       );
-    });
+    }
   }
 }
 
